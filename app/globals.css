@@ -1,0 +1,66 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+
+/* Base */
+body {
+  @apply bg-lightStart text-base font-body;
+}
+
+/* Headings */
+h1, h2, h3, h4 {
+  @apply font-heading;
+}
+
+/* Primary Gradient Text */
+.gradient-text {
+  @apply bg-gradient-to-r from-accent1 via-accent2 to-accent3 bg-clip-text text-transparent;
+}
+
+/* Light Section */
+.section-light {
+  @apply bg-gradient-to-b from-lightStart via-lightMid to-lightEnd;
+}
+
+/* Dark Section */
+.section-dark {
+  @apply bg-gradient-to-br from-plumStart via-plumMid to-plumEnd text-white;
+}
+
+/* Glass Card (for dark bg) */
+.card-dark {
+  @apply bg-white/10 backdrop-blur-md border border-white/10;
+}
+
+/* Light Card */
+.card-light {
+  @apply bg-white border border-black/10;
+}
+@keyframes slideDown {
+  0% {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slideDown {
+  animation: slideDown 0.8s ease forwards;
+}
+
+/* DELAYS */
+.delay-1 { animation-delay: 0.2s; opacity: 0; }
+.delay-2 { animation-delay: 0.4s; opacity: 0; }
+.delay-3 { animation-delay: 0.6s; opacity: 0; }
+.delay-4 { animation-delay: 0.8s; opacity: 0; }
+.delay-5 { animation-delay: 1s; opacity: 0; }
+
+/* FAIL-SAFE for animations */
+[style*="opacity: 0"] {
+  opacity: 1 !important;
+}

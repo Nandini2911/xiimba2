@@ -1,0 +1,410 @@
+"use client";
+
+import { useAuth } from '../../components/auth/AuthContext';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+
+interface OrderItem {
+  name: string;
+  quantity: number;
+}
+
+interface Order {
+  id: string;
+  status: string;
+  location: string;
+  customerId: string;
+  items: OrderItem[];
+}
+
+interface Customer {
+  id: string;
+  name: string;
+  role: 'customer' | 'staff';
+}
+
+const statusOptions = ['Order Placed', 'Processing', 'Shipped', 'In Transit', 'Delivered'];
+
+export default function AdminPage() {
+  const { user } = useAuth();
+  const router = useRouter();
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [customers, setCustomers] = useState<Customer[]>([]);
+  const [editingOrder, setEditingOrder] = useState<string | null>(null);
+  const [newStatus, setNewStatus] = useState('');
+  const [newLocation, setNewLocation] = useState('');
+
+  const [newCustomerId, setNewCustomerId] = useState('');
+  const [newCustomerName, setNewCustomerName] = useState('');
+  const [newCustomerPassword, setNewCustomerPassword] = useState('');
+
+  const [newOrderId, setNewOrderId] = useState('');
+  const [newOrderCustomer, setNewOrderCustomer] = useState('');
+  const [newOrderStatus, setNewOrderStatus] = useState('Order Placed');
+  const [newOrderLocation, setNewOrderLocation] = useState('');
+  const [newOrderItems, setNewOrderItems] = useState<OrderItem[]>([
+    { name: '', quantity: 1 },
+  ]);
+
+  useEffect(() => {
+    if (!user) {
+      router.push('/login');
+      return;
+    }
+    if (user.role !== 'staff') {
+      router.push('/');
+      return;
+    }
+
+    fetchOrders();
+    fetchCustomers();
+  }, [user, router]);
+
+  const fetchOrders = () => {
+    fetch('/api/orders')
+      .then(res => res.json())
+      .then(data => setOrders(data));
+  };
+
+  const fetchCustomers = () => {
+    fetch('/api/users')
+      .then(res => res.json())
+      .then(data => setCustomers(data));
+  };
+
+  const handleUpdate = async (orderId: string) => {
+    await fetch(`/api/orders/${orderId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: newStatus, location: newLocation }),
+    });
+    setOrders(orders.map(order =>
+      order.id === orderId ? { ...order, status: newStatus, location: newLocation } : order
+    ));
+    setEditingOrder(null);
+    setNewStatus('');
+    setNewLocation('');
+  };
+
+  const handleAddCustomer = async () => {
+    if (!newCustomerId || !newCustomerName || !newCustomerPassword) {
+      return;
+    }
+    const res = await fetch('/api/users', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: newCustomerId, name: newCustomerName, password: newCustomerPassword }),
+    });
+    if (res.ok) {
+      setNewCustomerId('');
+      setNewCustomerName('');
+      setNewCustomerPassword('');
+      fetchCustomers();
+    }
+  };
+
+  const handleDeleteCustomer = async (customerId: string) => {
+    if (!confirm('Delete this customer?')) {
+      return;
+    }
+
+    const res = await fetch(`/api/users/${customerId}`, {
+      method: 'DELETE',
+    });
+
+    if (!res.ok) {
+      const body = await res.json().catch(() => null);
+      alert(body?.error || 'Unable to delete customer');
+      return;
+    }
+
+    fetchCustomers();
+  };
+
+  const handleAddOrder = async () => {
+    if (!newOrderId || !newOrderCustomer || !newOrderLocation || newOrderItems.length === 0) {
+      return;
+    }
+
+    const validItems = newOrderItems.filter(item => item.name.trim() !== '' && item.quantity > 0);
+    if (validItems.length === 0) {
+      return;
+    }
+
+    await fetch('/api/orders', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        id: newOrderId,
+        customerId: newOrderCustomer,
+        status: newOrderStatus,
+        location: newOrderLocation,
+        items: validItems,
+      }),
+    });
+
+    setNewOrderId('');
+    setNewOrderCustomer('');
+    setNewOrderStatus('Order Placed');
+    setNewOrderLocation('');
+    setNewOrderItems([{ name: '', quantity: 1 }]);
+    fetchOrders();
+  };
+
+  const updateOrderItem = (index: number, field: keyof OrderItem, value: string | number) => {
+    setNewOrderItems(items =>
+      items.map((item, i) => i === index ? { ...item, [field]: field === 'quantity' ? Number(value) : value as string } : item)
+    );
+  };
+
+  const addOrderItem = () => {
+    setNewOrderItems(items => [...items, { name: '', quantity: 1 }]);
+  };
+
+  const removeOrderItem = (index: number) => {
+    setNewOrderItems(items => items.filter((_, i) => i !== index));
+  };
+
+  if (!user || user.role !== 'staff') {
+    return null;
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50 py-20">
+      <div className="max-w-7xl mx-auto px-4 space-y-10">
+        <div className="mb-4">
+          <h1 className="text-4xl font-bold text-gray-900">Admin Panel</h1>
+          <p className="text-gray-600">Manage customers, create orders, and update tracking.</p>
+        </div>
+
+        <section className="bg-white rounded-3xl shadow-md p-6">
+          <h2 className="text-2xl font-semibold text-gray-900 mb-4">Create Customer</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <input
+              value={newCustomerId}
+              onChange={(e) => setNewCustomerId(e.target.value)}
+              placeholder="Customer ID"
+              className="w-full px-4 py-3 border rounded-lg"
+            />
+            <input
+              value={newCustomerName}
+              onChange={(e) => setNewCustomerName(e.target.value)}
+              placeholder="Customer Name"
+              className="w-full px-4 py-3 border rounded-lg"
+            />
+            <input
+              type="password"
+              value={newCustomerPassword}
+              onChange={(e) => setNewCustomerPassword(e.target.value)}
+              placeholder="Password"
+              className="w-full px-4 py-3 border rounded-lg"
+            />
+          </div>
+          <button
+            onClick={handleAddCustomer}
+            className="mt-4 px-6 py-3 bg-plumMid text-white rounded-lg hover:bg-plumEnd"
+          >
+            Create Customer
+          </button>
+        </section>
+
+        <section className="bg-white rounded-3xl shadow-md p-6">
+          <h2 className="text-2xl font-semibold text-gray-900 mb-4">Customers</h2>
+          {customers.filter(c => c.role === 'customer').length > 0 ? (
+            <div className="space-y-4">
+              {customers.filter(c => c.role === 'customer').map((customer) => (
+                <div key={customer.id} className="grid grid-cols-1 md:grid-cols-4 gap-4 items-center border border-gray-200 rounded-2xl p-4">
+                  <div>
+                    <p className="text-sm font-medium text-gray-900">{customer.name}</p>
+                    <p className="text-sm text-gray-500">{customer.id}</p>
+                  </div>
+                  <div className="text-sm text-gray-600">Role: {customer.role}</div>
+                  <div className="md:col-span-2 text-right">
+                    <button
+                      onClick={() => handleDeleteCustomer(customer.id)}
+                      className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
+                    >
+                      Delete Customer
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-gray-500">No customers found yet.</p>
+          )}
+        </section>
+
+        <section className="bg-white rounded-3xl shadow-md p-6">
+          <h2 className="text-2xl font-semibold text-gray-900 mb-4">Create Order</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <input
+              value={newOrderId}
+              onChange={(e) => setNewOrderId(e.target.value)}
+              placeholder="Order ID"
+              className="w-full px-4 py-3 border rounded-lg"
+            />
+            <select
+              value={newOrderCustomer}
+              onChange={(e) => setNewOrderCustomer(e.target.value)}
+              className="w-full px-4 py-3 border rounded-lg"
+            >
+              <option value="">Select Customer</option>
+              {customers.filter(c => c.role === 'customer').map((customer) => (
+                <option key={customer.id} value={customer.id}>{customer.name} ({customer.id})</option>
+              ))}
+            </select>
+            <select
+              value={newOrderStatus}
+              onChange={(e) => setNewOrderStatus(e.target.value)}
+              className="w-full px-4 py-3 border rounded-lg"
+            >
+              {statusOptions.map(status => (
+                <option key={status} value={status}>{status}</option>
+              ))}
+            </select>
+            <input
+              value={newOrderLocation}
+              onChange={(e) => setNewOrderLocation(e.target.value)}
+              placeholder="Location"
+              className="w-full px-4 py-3 border rounded-lg"
+            />
+          </div>
+
+          <div className="mt-6 space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="font-semibold text-gray-900">Order Items</h3>
+              <button
+                onClick={addOrderItem}
+                className="px-4 py-2 bg-plumMid text-white rounded-lg hover:bg-plumEnd"
+              >
+                Add Item
+              </button>
+            </div>
+            <div className="space-y-3">
+              {newOrderItems.map((item, index) => (
+                <div key={index} className="grid grid-cols-1 md:grid-cols-5 gap-3 items-end">
+                  <input
+                    value={item.name}
+                    onChange={(e) => updateOrderItem(index, 'name', e.target.value)}
+                    placeholder="Item Name"
+                    className="col-span-3 px-4 py-3 border rounded-lg"
+                  />
+                  <input
+                    type="number"
+                    min={1}
+                    value={item.quantity}
+                    onChange={(e) => updateOrderItem(index, 'quantity', Number(e.target.value))}
+                    placeholder="Qty"
+                    className="px-4 py-3 border rounded-lg"
+                  />
+                  <button
+                    onClick={() => removeOrderItem(index)}
+                    className="px-4 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600"
+                  >
+                    Remove
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <button
+            onClick={handleAddOrder}
+            className="mt-6 px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600"
+          >
+            Create Order
+          </button>
+        </section>
+
+        <section className="bg-white rounded-3xl shadow-md p-6">
+          <h2 className="text-2xl font-semibold text-gray-900 mb-4">Orders</h2>
+          <div className="space-y-6">
+            {orders.map((order) => (
+              <div key={order.id} className="bg-gray-50 rounded-3xl p-6 border border-gray-200">
+                <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+                  <div>
+                    <h3 className="text-xl font-bold text-gray-900">Order #{order.id}</h3>
+                    <p className="text-sm text-gray-600">Customer: {order.customerId}</p>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <span className="px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800">{order.status}</span>
+                    <span className="px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800">{order.location}</span>
+                  </div>
+                </div>
+
+                <div className="mt-4 bg-white rounded-2xl p-4 border border-gray-200">
+                  <h4 className="font-semibold text-gray-900 mb-3">Items</h4>
+                  <div className="space-y-2">
+                    {order.items.map((item, index) => (
+                      <div key={index} className="flex justify-between text-sm text-gray-700">
+                        <span>{item.name}</span>
+                        <span>Qty: {item.quantity}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="mt-4">
+                  {editingOrder === order.id ? (
+                    <div className="space-y-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                          <select
+                            value={newStatus}
+                            onChange={(e) => setNewStatus(e.target.value)}
+                            className="w-full px-4 py-3 border rounded-lg"
+                          >
+                            <option value="">Select Status</option>
+                            {statusOptions.map(status => (
+                              <option key={status} value={status}>{status}</option>
+                            ))}
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
+                          <input
+                            value={newLocation}
+                            onChange={(e) => setNewLocation(e.target.value)}
+                            placeholder="New Location"
+                            className="w-full px-4 py-3 border rounded-lg"
+                          />
+                        </div>
+                      </div>
+                      <div className="flex gap-3">
+                        <button
+                          onClick={() => handleUpdate(order.id)}
+                          className="px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600"
+                        >
+                          Save
+                        </button>
+                        <button
+                          onClick={() => setEditingOrder(null)}
+                          className="px-6 py-3 bg-gray-300 text-gray-900 rounded-lg hover:bg-gray-400"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => {
+                        setEditingOrder(order.id);
+                        setNewStatus(order.status);
+                        setNewLocation(order.location);
+                      }}
+                      className="px-6 py-3 bg-plumMid text-white rounded-lg hover:bg-plumEnd"
+                    >
+                      Edit Tracking
+                    </button>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      </div>
+    </div>
+  );
+}
