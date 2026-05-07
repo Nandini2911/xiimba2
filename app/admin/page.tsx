@@ -56,13 +56,21 @@ export default function AdminPage() {
   const fetchOrders = useCallback(() => {
     fetch('/api/orders')
       .then(res => res.json())
-      .then(data => setOrders(data));
+      .then(data => {
+        if (Array.isArray(data)) {
+          setOrders(data);
+        }
+      });
   }, []);
 
   const fetchCustomers = useCallback(() => {
     fetch('/api/users')
       .then(res => res.json())
-      .then(data => setCustomers(data));
+      .then(data => {
+        if (Array.isArray(data)) {
+          setCustomers(data);
+        }
+      });
   }, []);
 
   const refreshAdminData = useCallback(() => {
@@ -85,8 +93,6 @@ export default function AdminPage() {
     }
 
     refreshAdminData();
-    const interval = setInterval(refreshAdminData, 10000);
-    return () => clearInterval(interval);
   }, [isLoading, user, router, refreshAdminData]);
 
   const handleUpdate = async (orderId: string) => {
