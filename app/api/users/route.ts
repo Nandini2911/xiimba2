@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getUsers, addUser, findUser, User } from '../../../lib/users';
 
+export const runtime = 'nodejs';
+
 export async function GET() {
   const users = getUsers();
   return NextResponse.json(users.map(({ password, ...user }) => user));

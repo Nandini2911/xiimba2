@@ -1,4 +1,5 @@
-// In-memory store for demo purposes
+import { readJsonFile, writeJsonFile } from './json-store';
+
 export interface OrderItem {
   name: string;
   quantity: number;
@@ -12,12 +13,16 @@ export interface Order {
   items: OrderItem[];
 }
 
-let orders: Order[] = [
+const ordersFileName = 'orders.json';
 
-  
-];
+const readOrders = () => readJsonFile<Order[]>(ordersFileName, []);
+
+const writeOrders = (orders: Order[]) => {
+  writeJsonFile(ordersFileName, orders);
+};
 
 export const getOrders = (customerId?: string) => {
+  const orders = readOrders();
   if (customerId) {
     return orders.filter(order => order.customerId === customerId);
   }
@@ -25,14 +30,25 @@ export const getOrders = (customerId?: string) => {
 };
 
 export const addOrder = (order: Order) => {
+  const orders = readOrders();
   orders.push(order);
+  writeOrders(orders);
 };
 
 export const updateOrder = (id: string, status?: string, location?: string, items?: OrderItem[]) => {
-  const order = orders.find(o => o.id === id);
-  if (order) {
-    if (status) order.status = status;
-    if (location) order.location = location;
-    if (Array.isArray(items) && items.length > 0) order.items = items;
-  }
+  const orders = readOrders();
+  const updatedOrders = orders.map(order => {
+    if (order.id !== id) {
+      return order;
+    }
+
+    return {
+      ...order,
+      status: status || order.status,
+      location: location || order.location,
+      items: Array.isArray(items) && items.length > 0 ? items : order.items,
+    };
+  });
+
+  writeOrders(updatedOrders);
 };

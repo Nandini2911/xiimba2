@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { findUser } from '../../../../lib/users';
 
+export const runtime = 'nodejs';
+
 export async function POST(request: NextRequest) {
   const body = await request.json();
   if (!body?.id || !body?.password) {
