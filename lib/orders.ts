@@ -31,6 +31,10 @@ export const getOrders = (customerId?: string) => {
 
 export const addOrder = (order: Order) => {
   const orders = readOrders();
+  if (orders.some(existingOrder => existingOrder.id === order.id)) {
+    throw new Error('Order ID already exists');
+  }
+
   orders.push(order);
   writeOrders(orders);
 };

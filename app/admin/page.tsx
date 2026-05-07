@@ -48,6 +48,9 @@ export default function AdminPage() {
   const [newOrderItems, setNewOrderItems] = useState<OrderItem[]>([
     { name: '', quantity: 1 },
   ]);
+  const [orderMessage, setOrderMessage] = useState('');
+  const [orderError, setOrderError] = useState('');
+  const [isCreatingOrder, setIsCreatingOrder] = useState(false);
 
   const fetchOrders = useCallback(() => {
     fetch('/api/orders')
@@ -81,19 +84,28 @@ export default function AdminPage() {
     }
 
     refreshAdminData();
-    const interval = setInterval(refreshAdminData, 5000);
-    return () => clearInterval(interval);
   }, [isLoading, user, router, refreshAdminData]);
 
   const handleUpdate = async (orderId: string) => {
-    await fetch(`/api/orders/${orderId}`, {
+    setOrderMessage('');
+    setOrderError('');
+
+    const res = await fetch(`/api/orders/${orderId}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status: newStatus, location: newLocation }),
     });
+
+    if (!res.ok) {
+      const body = await res.json().catch(() => null);
+      setOrderError(body?.error || 'Unable to update order.');
+      return;
+    }
+
     setEditingOrder(null);
     setNewStatus('');
     setNewLocation('');
+    setOrderMessage('Order updated successfully.');
     refreshAdminData();
   };
 
@@ -156,33 +168,59 @@ export default function AdminPage() {
   };
 
   const handleAddOrder = async () => {
-    if (!newOrderId || !newOrderCustomer || !newOrderLocation || newOrderItems.length === 0) {
+    const orderId = newOrderId.trim();
+    const orderLocation = newOrderLocation.trim();
+
+    setOrderMessage('');
+    setOrderError('');
+
+    if (!orderId || !newOrderCustomer || !orderLocation || newOrderItems.length === 0) {
+      setOrderError('Please fill order ID, customer, location, and at least one item.');
       return;
     }
 
-    const validItems = newOrderItems.filter(item => item.name.trim() !== '' && item.quantity > 0);
+    const validItems = newOrderItems
+      .map(item => ({ ...item, name: item.name.trim() }))
+      .filter(item => item.name !== '' && item.quantity > 0);
+
     if (validItems.length === 0) {
+      setOrderError('Please add at least one valid order item.');
       return;
     }
 
-    await fetch('/api/orders', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        id: newOrderId,
-        customerId: newOrderCustomer,
-        status: newOrderStatus,
-        location: newOrderLocation,
-        items: validItems,
-      }),
-    });
+    setIsCreatingOrder(true);
 
-    setNewOrderId('');
-    setNewOrderCustomer('');
-    setNewOrderStatus('Order Placed');
-    setNewOrderLocation('');
-    setNewOrderItems([{ name: '', quantity: 1 }]);
-    refreshAdminData();
+    try {
+      const res = await fetch('/api/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: orderId,
+          customerId: newOrderCustomer,
+          status: newOrderStatus,
+          location: orderLocation,
+          items: validItems,
+        }),
+      });
+
+      if (!res.ok) {
+        const body = await res.json().catch(() => null);
+        setOrderError(body?.error || 'Unable to create order.');
+        return;
+      }
+
+      setNewOrderId('');
+      setNewOrderCustomer('');
+      setNewOrderStatus('Order Placed');
+      setNewOrderLocation('');
+      setNewOrderItems([{ name: '', quantity: 1 }]);
+      setOrderMessage('Order created successfully.');
+      refreshAdminData();
+    } catch {
+      setOrderError('Unable to create order. Please try again.');
+    } finally {
+      setIsCreatingOrder(false);
+    }
   };
 
   const updateOrderItem = (index: number, field: keyof OrderItem, value: string | number) => {
@@ -204,6 +242,7 @@ export default function AdminPage() {
   }
 
   const customerList = customers.filter(c => c.role === 'customer');
+  const orderList = orders;
 
   return (
     <div className="min-h-screen bg-gray-50 py-20">
@@ -211,7 +250,12 @@ export default function AdminPage() {
         <div className="mb-4">
           <h1 className="text-4xl font-bold text-gray-900">Admin Panel</h1>
           <p className="text-gray-600">Manage customers, create orders, and update tracking.</p>
-          <p className="text-sm text-gray-500 mt-2">Data refreshes automatically every 5 seconds.</p>
+          <button
+            onClick={refreshAdminData}
+            className="mt-4 rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+          >
+            Refresh All Data
+          </button>
         </div>
 
         <section className="bg-white rounded-3xl shadow-md p-6">
@@ -363,16 +407,31 @@ export default function AdminPage() {
 
           <button
             onClick={handleAddOrder}
-            className="mt-6 px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600"
+            disabled={isCreatingOrder}
+            className="mt-6 px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            Create Order
+            {isCreatingOrder ? 'Creating...' : 'Create Order'}
           </button>
+          {orderError && (
+            <p className="mt-3 text-sm text-red-600">{orderError}</p>
+          )}
+          {orderMessage && (
+            <p className="mt-3 text-sm text-green-700">{orderMessage}</p>
+          )}
         </section>
 
         <section className="bg-white rounded-3xl shadow-md p-6">
-          <h2 className="text-2xl font-semibold text-gray-900 mb-4">Orders</h2>
+          <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+            <h2 className="text-2xl font-semibold text-gray-900">Orders ({orderList.length})</h2>
+            <button
+              onClick={refreshAdminData}
+              className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+            >
+              Refresh Orders
+            </button>
+          </div>
           <div className="space-y-6">
-            {orders.map((order) => (
+            {orderList.map((order) => (
               <div key={order.id} className="bg-gray-50 rounded-3xl p-6 border border-gray-200">
                 <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
                   <div>

@@ -1,14 +1,23 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
+import { tmpdir } from 'os';
 import { dirname, join } from 'path';
 
-const dataDirectory = join(process.cwd(), 'data');
+const seedDataDirectory = join(process.cwd(), 'data');
+const dataDirectory = process.env.VERCEL
+  ? join(tmpdir(), 'xiimba2-data')
+  : seedDataDirectory;
 
 export const readJsonFile = <T>(fileName: string, fallback: T): T => {
   const filePath = join(dataDirectory, fileName);
 
   if (!existsSync(filePath)) {
-    writeJsonFile(fileName, fallback);
-    return fallback;
+    const seedFilePath = join(seedDataDirectory, fileName);
+    const initialData = existsSync(seedFilePath)
+      ? JSON.parse(readFileSync(seedFilePath, 'utf8')) as T
+      : fallback;
+
+    writeJsonFile(fileName, initialData);
+    return initialData;
   }
 
   try {

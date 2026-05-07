@@ -13,20 +13,25 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const body = await request.json();
+  try {
+    const body = await request.json();
 
-  if (!body?.id || !body?.customerId || !body?.status || !body?.location || !Array.isArray(body.items)) {
-    return NextResponse.json({ error: 'Missing required order fields' }, { status: 400 });
+    if (!body?.id || !body?.customerId || !body?.status || !body?.location || !Array.isArray(body.items)) {
+      return NextResponse.json({ error: 'Missing required order fields' }, { status: 400 });
+    }
+
+    const order: Order = {
+      id: body.id,
+      customerId: body.customerId,
+      status: body.status,
+      location: body.location,
+      items: body.items,
+    };
+
+    addOrder(order);
+    return NextResponse.json({ success: true, order });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    return NextResponse.json({ error: `Unable to create order: ${message}` }, { status: 500 });
   }
-
-  const order: Order = {
-    id: body.id,
-    customerId: body.customerId,
-    status: body.status,
-    location: body.location,
-    items: body.items,
-  };
-
-  addOrder(order);
-  return NextResponse.json({ success: true, order });
 }
