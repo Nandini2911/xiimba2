@@ -37,6 +37,9 @@ export default function AdminPage() {
   const [newCustomerId, setNewCustomerId] = useState('');
   const [newCustomerName, setNewCustomerName] = useState('');
   const [newCustomerPassword, setNewCustomerPassword] = useState('');
+  const [customerMessage, setCustomerMessage] = useState('');
+  const [customerError, setCustomerError] = useState('');
+  const [isCreatingCustomer, setIsCreatingCustomer] = useState(false);
 
   const [newOrderId, setNewOrderId] = useState('');
   const [newOrderCustomer, setNewOrderCustomer] = useState('');
@@ -95,19 +98,42 @@ export default function AdminPage() {
   };
 
   const handleAddCustomer = async () => {
-    if (!newCustomerId || !newCustomerName || !newCustomerPassword) {
+    const customerId = newCustomerId.trim();
+    const customerName = newCustomerName.trim();
+    const customerPassword = newCustomerPassword.trim();
+
+    setCustomerMessage('');
+    setCustomerError('');
+
+    if (!customerId || !customerName || !customerPassword) {
+      setCustomerError('Please fill customer ID, name, and password.');
       return;
     }
-    const res = await fetch('/api/users', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id: newCustomerId, name: newCustomerName, password: newCustomerPassword }),
-    });
-    if (res.ok) {
+
+    setIsCreatingCustomer(true);
+
+    try {
+      const res = await fetch('/api/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: customerId, name: customerName, password: customerPassword }),
+      });
+
+      if (!res.ok) {
+        const body = await res.json().catch(() => null);
+        setCustomerError(body?.error || 'Unable to create customer.');
+        return;
+      }
+
       setNewCustomerId('');
       setNewCustomerName('');
       setNewCustomerPassword('');
+      setCustomerMessage('Customer created successfully.');
       refreshAdminData();
+    } catch {
+      setCustomerError('Unable to create customer. Please try again.');
+    } finally {
+      setIsCreatingCustomer(false);
     }
   };
 
@@ -211,10 +237,17 @@ export default function AdminPage() {
           </div>
           <button
             onClick={handleAddCustomer}
-            className="mt-4 px-6 py-3 bg-plumMid text-white rounded-lg hover:bg-plumEnd"
+            disabled={isCreatingCustomer}
+            className="mt-4 px-6 py-3 bg-plumMid text-white rounded-lg hover:bg-plumEnd disabled:cursor-not-allowed disabled:opacity-60"
           >
-            Create Customer
+            {isCreatingCustomer ? 'Creating...' : 'Create Customer'}
           </button>
+          {customerError && (
+            <p className="mt-3 text-sm text-red-600">{customerError}</p>
+          )}
+          {customerMessage && (
+            <p className="mt-3 text-sm text-green-700">{customerMessage}</p>
+          )}
         </section>
 
         <section className="bg-white rounded-3xl shadow-md p-6">
