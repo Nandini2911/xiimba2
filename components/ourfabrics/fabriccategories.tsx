@@ -38,8 +38,7 @@ const categories = [
   },
   {
     title: "Finished & Treated",
-    images: ["/image/Finished.webp", "/image/Finished1.webp", "/image/Finished2.png", "/image/Finished3.png", "/image/Finished4.png"],
-    images: ["/image/Finished.webp", "/image/Finished1.webp","/image/finished5.webp"],
+    images: ["/image/Finished.webp", "/image/Finished1.webp", "/image/Finished2.png", "/image/Finished3.png", "/image/Finished4.png", "/image/finished5.webp"],
   },
 ];
 
