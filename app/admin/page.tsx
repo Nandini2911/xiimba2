@@ -78,23 +78,24 @@ export default function AdminPage() {
     fetchCustomers();
   }, [fetchOrders, fetchCustomers]);
 
-  useEffect(() => {
-    if (isLoading) {
-      return;
-    }
+useEffect(() => {
+  if (isLoading) {
+    return;
+  }
 
-    if (!user) {
-      router.push('/login');
-      return;
-    }
-    if (user.role !== 'staff') {
-      router.push('/');
-      return;
-    }
+  if (!user) {
+    router.push('/login');
+    return;
+  }
 
-    refreshAdminData();
-  }, [isLoading, user, router, refreshAdminData]);
+  if (user.role !== 'staff') {
+    router.push('/');
+    return;
+  }
 
+  fetchOrders();
+  // fetchCustomers();  <-- remove/comment
+}, [isLoading, user, router, fetchOrders]);
   const handleUpdate = async (orderId: string) => {
     setOrderMessage('');
     setOrderError('');
