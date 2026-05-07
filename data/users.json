@@ -16,5 +16,17 @@
     "password": "admin",
     "name": "Admin",
     "role": "staff"
+  },
+  {
+    "id": "001",
+    "password": "aayushi",
+    "name": "aayushi",
+    "role": "customer"
+  },
+  {
+    "id": "002",
+    "password": "ritika",
+    "name": "ritika",
+    "role": "customer"
   }
 ]
