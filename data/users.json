@@ -16,29 +16,5 @@
     "password": "admin",
     "name": "Admin",
     "role": "staff"
-  },
-  {
-    "id": "001",
-    "password": "aayushi",
-    "name": "aayushi",
-    "role": "customer"
-  },
-  {
-    "id": "002",
-    "password": "ritika",
-    "name": "ritika",
-    "role": "customer"
-  },
-  {
-    "id": "003",
-    "password": "ravish",
-    "name": "ravish",
-    "role": "customer"
-  },
-  {
-    "id": "004",
-    "password": "simran",
-    "name": "simran",
-    "role": "customer"
   }
 ]

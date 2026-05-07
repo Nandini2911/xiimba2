@@ -56,3 +56,8 @@ export const updateOrder = (id: string, status?: string, location?: string, item
 
   writeOrders(updatedOrders);
 };
+
+export const deleteOrdersByCustomerId = (customerId: string) => {
+  const orders = readOrders().filter(order => order.customerId !== customerId);
+  writeOrders(orders);
+};

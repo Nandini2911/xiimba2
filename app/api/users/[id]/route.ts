@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { findUser, deleteUser } from '../../../../lib/users';
+import { deleteOrdersByCustomerId } from '../../../../lib/orders';
 
 export const runtime = 'nodejs';
 
@@ -12,6 +13,7 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
     }
 
     deleteUser(id);
+    deleteOrdersByCustomerId(id);
     return NextResponse.json({ success: true });
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error';

@@ -151,7 +151,7 @@ export default function AdminPage() {
   };
 
   const handleDeleteCustomer = async (customerId: string) => {
-    if (!confirm('Delete this customer?')) {
+    if (!confirm('Delete this customer and all of their orders?')) {
       return;
     }
 
