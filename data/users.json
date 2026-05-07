@@ -28,5 +28,11 @@
     "password": "ritika",
     "name": "ritika",
     "role": "customer"
+  },
+  {
+    "id": "003",
+    "password": "ravish",
+    "name": "ravish",
+    "role": "customer"
   }
 ]

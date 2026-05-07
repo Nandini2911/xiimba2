@@ -203,6 +203,8 @@ export default function AdminPage() {
     return null;
   }
 
+  const customerList = customers.filter(c => c.role === 'customer');
+
   return (
     <div className="min-h-screen bg-gray-50 py-20">
       <div className="max-w-7xl mx-auto px-4 space-y-10">
@@ -251,10 +253,18 @@ export default function AdminPage() {
         </section>
 
         <section className="bg-white rounded-3xl shadow-md p-6">
-          <h2 className="text-2xl font-semibold text-gray-900 mb-4">Customers</h2>
-          {customers.filter(c => c.role === 'customer').length > 0 ? (
+          <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+            <h2 className="text-2xl font-semibold text-gray-900">Customers ({customerList.length})</h2>
+            <button
+              onClick={refreshAdminData}
+              className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+            >
+              Refresh Customers
+            </button>
+          </div>
+          {customerList.length > 0 ? (
             <div className="space-y-4">
-              {customers.filter(c => c.role === 'customer').map((customer) => (
+              {customerList.map((customer) => (
                 <div key={customer.id} className="grid grid-cols-1 md:grid-cols-4 gap-4 items-center border border-gray-200 rounded-2xl p-4">
                   <div>
                     <p className="text-sm font-medium text-gray-900">{customer.name}</p>
