@@ -34,5 +34,11 @@
     "password": "ravish",
     "name": "ravish",
     "role": "customer"
+  },
+  {
+    "id": "004",
+    "password": "simran",
+    "name": "simran",
+    "role": "customer"
   }
 ]
