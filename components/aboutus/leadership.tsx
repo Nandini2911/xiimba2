@@ -11,7 +11,7 @@ const leaders = [
   {
     name: "Vikram Jugalkishor Agarwal",
     role: "Designated Partner",
-    image: "/image/leader2.webp",
+    image: "/image/leader2.jpeg",
   },
 ];
 

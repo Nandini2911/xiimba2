@@ -16,7 +16,7 @@ const info = [
   },
   {
     title: "Email",
-    content: "sales@xiimba.com",
+    content: "xiimbaattires@gmail.com",
     icon: "✉️",
   },
 ];

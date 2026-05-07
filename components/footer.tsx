@@ -5,7 +5,6 @@ import Link from "next/link";
 export default function Footer() {
   return (
     <footer className="bg-[#faf7fb] px-6 pt-20 pb-10">
-
       <div className="max-w-7xl mx-auto">
 
         {/* TOP GRID */}
@@ -18,37 +17,38 @@ export default function Footer() {
             </h2>
 
             <p className="text-sm text-charcoal/70 leading-relaxed max-w-xs">
-              Intelligent textile manufacturing driven by design, precision, and scalability.
+              Intelligent textile manufacturing driven by design, precision,
+              and scalability.
             </p>
           </div>
 
-     
+          {/* QUICK LINKS */}
+          <div>
+            <h3 className="text-sm font-semibold text-charcoal mb-4 tracking-wide">
+              Quick Links
+            </h3>
 
-<div>
-  <h3 className="text-sm font-semibold text-charcoal mb-4 tracking-wide">
-    Navigation
-  </h3>
+            <ul className="space-y-3 text-sm text-charcoal/70">
+              {[
+                { name: "Home", href: "/" },
+                { name: "About Us", href: "/about" },
+                { name: "What We Do", href: "/what-we-do" },
+                { name: "Our Fabrics", href: "/ourfabrics" },
+                { name: "Sustainability", href: "/sustainability" },
+                { name: "Contact Us", href: "/contact" },
+              ].map((item, i) => (
+                <li key={i}>
+                  <Link
+                    href={item.href}
+                    className="hover:text-charcoal transition"
+                  >
+                    {item.name}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
 
-  <ul className="space-y-3 text-sm text-charcoal/70">
-    {[
-      { name: "Home", href: "/" },
-      { name: "About Us", href: "/about" },
-      { name: "What We Do", href: "/what-we-do" },
-      { name: "Our Fabrics", href: "/ourfabrics" },
-      { name: "Sustainability", href: "/sustainability" },
-      { name: "Contact Us", href: "/contact" },
-    ].map((item, i) => (
-      <li key={i}>
-        <Link
-          href={item.href}
-          className="hover:text-charcoal transition"
-        >
-          {item.name}
-        </Link>
-      </li>
-    ))}
-  </ul>
-</div>
           {/* CONTACT */}
           <div>
             <h3 className="text-sm font-semibold text-charcoal mb-4 tracking-wide">
@@ -64,7 +64,7 @@ export default function Footer() {
             </p>
 
             <p className="text-sm text-charcoal/70 mt-4">
-              Email: sales@xiimba.com
+              Email: xiimbaattires@gmail.com
             </p>
 
             <p className="text-sm text-charcoal/70">
@@ -78,14 +78,23 @@ export default function Footer() {
         <div className="h-[1px] w-full bg-gradient-to-r from-transparent via-gray-300 to-transparent mb-6" />
 
         {/* BOTTOM */}
-        <div className="flex flex-col md:flex-row justify-between items-center text-sm text-charcoal/60">
+        <div className="flex flex-col md:flex-row justify-between items-center text-sm text-charcoal/60 gap-2">
 
           <p>
-            © {new Date().getFullYear()} Xiimba Attire Intelligence LLP. All rights reserved.
+            © {new Date().getFullYear()} Xiimba Attire Intelligence LLP. All
+            rights reserved.
           </p>
 
-          <p className="mt-2 md:mt-0">
-            Designed for modern textile manufacturing
+          <p>
+             developed by{" "}
+            <a
+              href="https://doubletroublestudio.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-charcoal transition font-medium"
+            >
+              Double Trouble Studio
+            </a>
           </p>
 
         </div>
