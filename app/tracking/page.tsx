@@ -2,7 +2,7 @@
 
 import { useAuth } from '../../components/auth/AuthContext';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 interface OrderItem {
   name: string;
@@ -22,11 +22,23 @@ const statusSteps = ['Order Placed', 'Processing', 'Shipped', 'In Transit', 'Del
 const getStatusIndex = (status: string) => statusSteps.indexOf(status);
 
 export default function TrackingPage() {
-  const { user } = useAuth();
+  const { user, isLoading } = useAuth();
   const router = useRouter();
   const [orders, setOrders] = useState<Order[]>([]);
 
+  const fetchOrders = useCallback(() => {
+    if (user) {
+      fetch(`/api/orders?customerId=${user.id}`)
+        .then(res => res.json())
+        .then(data => setOrders(data));
+    }
+  }, [user]);
+
   useEffect(() => {
+    if (isLoading) {
+      return;
+    }
+
     if (!user) {
       router.push('/login');
       return;
@@ -39,17 +51,9 @@ export default function TrackingPage() {
     fetchOrders();
     const interval = setInterval(fetchOrders, 10000);
     return () => clearInterval(interval);
-  }, [user, router]);
+  }, [isLoading, user, router, fetchOrders]);
 
-  const fetchOrders = () => {
-    if (user) {
-      fetch(`/api/orders?customerId=${user.id}`)
-        .then(res => res.json())
-        .then(data => setOrders(data));
-    }
-  };
-
-  if (!user || user.role !== 'customer') {
+  if (isLoading || !user || user.role !== 'customer') {
     return null;
   }
 

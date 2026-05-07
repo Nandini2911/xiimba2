@@ -2,7 +2,7 @@
 
 import { useAuth } from '../../components/auth/AuthContext';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 interface OrderItem {
   name: string;
@@ -26,7 +26,7 @@ interface Customer {
 const statusOptions = ['Order Placed', 'Processing', 'Shipped', 'In Transit', 'Delivered'];
 
 export default function AdminPage() {
-  const { user } = useAuth();
+  const { user, isLoading } = useAuth();
   const router = useRouter();
   const [orders, setOrders] = useState<Order[]>([]);
   const [customers, setCustomers] = useState<Customer[]>([]);
@@ -46,7 +46,28 @@ export default function AdminPage() {
     { name: '', quantity: 1 },
   ]);
 
+  const fetchOrders = useCallback(() => {
+    fetch('/api/orders')
+      .then(res => res.json())
+      .then(data => setOrders(data));
+  }, []);
+
+  const fetchCustomers = useCallback(() => {
+    fetch('/api/users')
+      .then(res => res.json())
+      .then(data => setCustomers(data));
+  }, []);
+
+  const refreshAdminData = useCallback(() => {
+    fetchOrders();
+    fetchCustomers();
+  }, [fetchOrders, fetchCustomers]);
+
   useEffect(() => {
+    if (isLoading) {
+      return;
+    }
+
     if (!user) {
       router.push('/login');
       return;
@@ -56,21 +77,10 @@ export default function AdminPage() {
       return;
     }
 
-    fetchOrders();
-    fetchCustomers();
-  }, [user, router]);
-
-  const fetchOrders = () => {
-    fetch('/api/orders')
-      .then(res => res.json())
-      .then(data => setOrders(data));
-  };
-
-  const fetchCustomers = () => {
-    fetch('/api/users')
-      .then(res => res.json())
-      .then(data => setCustomers(data));
-  };
+    refreshAdminData();
+    const interval = setInterval(refreshAdminData, 5000);
+    return () => clearInterval(interval);
+  }, [isLoading, user, router, refreshAdminData]);
 
   const handleUpdate = async (orderId: string) => {
     await fetch(`/api/orders/${orderId}`, {
@@ -78,12 +88,10 @@ export default function AdminPage() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status: newStatus, location: newLocation }),
     });
-    setOrders(orders.map(order =>
-      order.id === orderId ? { ...order, status: newStatus, location: newLocation } : order
-    ));
     setEditingOrder(null);
     setNewStatus('');
     setNewLocation('');
+    refreshAdminData();
   };
 
   const handleAddCustomer = async () => {
@@ -99,7 +107,7 @@ export default function AdminPage() {
       setNewCustomerId('');
       setNewCustomerName('');
       setNewCustomerPassword('');
-      fetchCustomers();
+      refreshAdminData();
     }
   };
 
@@ -118,7 +126,7 @@ export default function AdminPage() {
       return;
     }
 
-    fetchCustomers();
+    refreshAdminData();
   };
 
   const handleAddOrder = async () => {
@@ -148,7 +156,7 @@ export default function AdminPage() {
     setNewOrderStatus('Order Placed');
     setNewOrderLocation('');
     setNewOrderItems([{ name: '', quantity: 1 }]);
-    fetchOrders();
+    refreshAdminData();
   };
 
   const updateOrderItem = (index: number, field: keyof OrderItem, value: string | number) => {
@@ -165,7 +173,7 @@ export default function AdminPage() {
     setNewOrderItems(items => items.filter((_, i) => i !== index));
   };
 
-  if (!user || user.role !== 'staff') {
+  if (isLoading || !user || user.role !== 'staff') {
     return null;
   }
 
@@ -175,6 +183,7 @@ export default function AdminPage() {
         <div className="mb-4">
           <h1 className="text-4xl font-bold text-gray-900">Admin Panel</h1>
           <p className="text-gray-600">Manage customers, create orders, and update tracking.</p>
+          <p className="text-sm text-gray-500 mt-2">Data refreshes automatically every 5 seconds.</p>
         </div>
 
         <section className="bg-white rounded-3xl shadow-md p-6">
