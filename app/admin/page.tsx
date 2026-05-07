@@ -40,6 +40,7 @@ export default function AdminPage() {
   const [customerMessage, setCustomerMessage] = useState('');
   const [customerError, setCustomerError] = useState('');
   const [isCreatingCustomer, setIsCreatingCustomer] = useState(false);
+  const [customerSearchId, setCustomerSearchId] = useState('');
 
   const [newOrderId, setNewOrderId] = useState('');
   const [newOrderCustomer, setNewOrderCustomer] = useState('');
@@ -242,6 +243,9 @@ export default function AdminPage() {
   }
 
   const customerList = customers.filter(c => c.role === 'customer');
+  const filteredCustomerList = customerList.filter(customer =>
+    customer.id.toLowerCase().includes(customerSearchId.trim().toLowerCase())
+  );
   const orderList = orders;
 
   return (
@@ -299,16 +303,24 @@ export default function AdminPage() {
         <section className="bg-white rounded-3xl shadow-md p-6">
           <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <h2 className="text-2xl font-semibold text-gray-900">Customers ({customerList.length})</h2>
-            <button
-              onClick={refreshAdminData}
-              className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
-            >
-              Refresh Customers
-            </button>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+              <input
+                value={customerSearchId}
+                onChange={(e) => setCustomerSearchId(e.target.value)}
+                placeholder="Search by customer ID"
+                className="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm sm:w-64"
+              />
+              <button
+                onClick={refreshAdminData}
+                className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+              >
+                Refresh Customers
+              </button>
+            </div>
           </div>
-          {customerList.length > 0 ? (
+          {filteredCustomerList.length > 0 ? (
             <div className="space-y-4">
-              {customerList.map((customer) => (
+              {filteredCustomerList.map((customer) => (
                 <div key={customer.id} className="grid grid-cols-1 md:grid-cols-4 gap-4 items-center border border-gray-200 rounded-2xl p-4">
                   <div>
                     <p className="text-sm font-medium text-gray-900">{customer.name}</p>
@@ -327,7 +339,9 @@ export default function AdminPage() {
               ))}
             </div>
           ) : (
-            <p className="text-gray-500">No customers found yet.</p>
+            <p className="text-gray-500">
+              {customerSearchId.trim() ? 'No customer found for this ID.' : 'No customers found yet.'}
+            </p>
           )}
         </section>
 
