@@ -16,5 +16,11 @@
     "password": "admin",
     "name": "Admin",
     "role": "staff"
+  },
+   {
+    "id": "001",
+    "password": "ravish",
+    "name": "ravish",
+    "role": "staff"
   }
 ]
