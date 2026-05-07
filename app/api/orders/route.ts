@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
   const customerId = searchParams.get('customerId');
 
   const orders = getOrders(customerId || undefined);
-  return NextResponse.json(orders);
+  return NextResponse.json(orders, { headers: { 'Cache-Control': 'no-store' } });
 }
 
 export async function POST(request: NextRequest) {

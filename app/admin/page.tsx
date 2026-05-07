@@ -85,6 +85,8 @@ export default function AdminPage() {
     }
 
     refreshAdminData();
+    const interval = setInterval(refreshAdminData, 10000);
+    return () => clearInterval(interval);
   }, [isLoading, user, router, refreshAdminData]);
 
   const handleUpdate = async (orderId: string) => {

@@ -5,7 +5,16 @@ export const runtime = 'nodejs';
 
 export async function GET() {
   const users = getUsers();
-  return NextResponse.json(users.map(({ password, ...user }) => user));
+  const publicUsers = users.map(user => ({
+    id: user.id,
+    name: user.name,
+    role: user.role,
+  }));
+
+  return NextResponse.json(
+    publicUsers,
+    { headers: { 'Cache-Control': 'no-store' } }
+  );
 }
 
 export async function POST(request: NextRequest) {
