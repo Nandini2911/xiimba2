@@ -77,7 +77,6 @@ export default function AdminPage() {
     fetchOrders();
     fetchCustomers();
   }, [fetchOrders, fetchCustomers]);
-
 useEffect(() => {
   if (isLoading) {
     return;
@@ -94,8 +93,9 @@ useEffect(() => {
   }
 
   fetchOrders();
-  // fetchCustomers();  <-- remove/comment
-}, [isLoading, user, router, fetchOrders]);
+  fetchCustomers();
+}, [isLoading, user, router, fetchOrders, fetchCustomers]);
+
   const handleUpdate = async (orderId: string) => {
     setOrderMessage('');
     setOrderError('');

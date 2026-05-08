@@ -17,10 +17,16 @@
     "name": "Admin",
     "role": "staff"
   },
-   {
+  {
+    "id": "user1234",
+    "password": "user1234",
+    "name": "aayushi",
+    "role": "customer"
+  },
+  {
     "id": "001",
-    "password": "ravish",
-    "name": "ravish",
-    "role": "staff"
+    "password": "nandini",
+    "name": "nandini",
+    "role": "customer"
   }
 ]
