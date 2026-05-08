@@ -1,1 +1,18 @@
-[]
+[
+  {
+    "id": "ORD001",
+    "status": "Processing",
+    "location": "Mumbai",
+    "customerId": "001",
+    "items": [
+      {
+        "name": "Cotton Fabric",
+        "quantity": 5
+      },
+      {
+        "name": "Polyester Fabric",
+        "quantity": 2
+      }
+    ]
+  }
+]
