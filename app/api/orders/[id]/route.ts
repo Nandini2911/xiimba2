@@ -1,60 +1,77 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { getOrderById, updateOrder, deleteOrder } from '../../../../lib/db-orders';
+import fs from "fs/promises";
+import path from "path";
 
-export const runtime = 'nodejs';
+export interface Order {
+  id: string;
+  status?: string;
+  location?: string;
+  items?: any[];
+}
 
-export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+const filePath = path.join(process.cwd(), "data", "orders.json");
+
+// Read orders
+async function readOrders(): Promise<Order[]> {
   try {
-    const { id } = await params;
-    const order = await getOrderById(id);
+    const data = await fs.readFile(filePath, "utf-8");
 
-    if (!order) {
-      return NextResponse.json({ error: 'Order not found' }, { status: 404 });
-    }
-
-    return NextResponse.json(order);
+    return JSON.parse(data || "[]");
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Unknown error';
-    return NextResponse.json({ error: `Unable to fetch order: ${message}` }, { status: 500 });
+    console.error("READ ORDERS ERROR:", error);
+
+    return [];
   }
 }
 
-export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  try {
-    const { id } = await params;
-    const { status, location, items } = await request.json();
-
-    const order = await getOrderById(id);
-    if (!order) {
-      return NextResponse.json({ error: 'Order not found' }, { status: 404 });
-    }
-
-    const updatedOrder = await updateOrder(id, {
-      status,
-      location,
-      items,
-    });
-
-    return NextResponse.json({ success: true, order: updatedOrder });
-  } catch (error) {
-    const message = error instanceof Error ? error.message : 'Unknown error';
-    return NextResponse.json({ error: `Unable to update order: ${message}` }, { status: 500 });
-  }
+// Write orders
+async function writeOrders(orders: Order[]) {
+  await fs.writeFile(
+    filePath,
+    JSON.stringify(orders, null, 2)
+  );
 }
 
-export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  try {
-    const { id } = await params;
-    const order = await getOrderById(id);
+// Get order by ID
+export async function getOrderById(id: string) {
+  const orders = await readOrders();
 
-    if (!order) {
-      return NextResponse.json({ error: 'Order not found' }, { status: 404 });
-    }
+  return orders.find((order) => order.id === id);
+}
 
-    await deleteOrder(id);
-    return NextResponse.json({ success: true });
-  } catch (error) {
-    const message = error instanceof Error ? error.message : 'Unknown error';
-    return NextResponse.json({ error: `Unable to delete order: ${message}` }, { status: 500 });
+// Update order
+export async function updateOrder(
+  id: string,
+  updatedData: Partial<Order>
+) {
+  const orders = await readOrders();
+
+  const index = orders.findIndex(
+    (order) => order.id === id
+  );
+
+  if (index === -1) {
+    return null;
   }
+
+  orders[index] = {
+    ...orders[index],
+    ...updatedData,
+  };
+
+  await writeOrders(orders);
+
+  return orders[index];
+}
+
+// Delete order
+export async function deleteOrder(id: string) {
+  const orders = await readOrders();
+
+  const filteredOrders = orders.filter(
+    (order) => order.id !== id
+  );
+
+  await writeOrders(filteredOrders);
+
+  return true;
 }
