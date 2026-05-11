@@ -63,5 +63,3 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
     return NextResponse.json({ error: `Unable to delete user: ${message}` }, { status: 500 });
   }
 }
-  }
-}
