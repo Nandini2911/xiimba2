@@ -6,9 +6,16 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "db:push": "prisma db push",
+    "db:migrate": "prisma migrate deploy",
+    "db:studio": "prisma studio",
+    "db:generate": "prisma generate",
+    "db:reset": "prisma migrate reset",
+    "migrate:data": "ts-node scripts/migrate-data.ts"
   },
   "dependencies": {
+    "@prisma/client": "^5.22.0",
     "clsx": "^2.1.1",
     "framer-motion": "^12.38.0",
     "lucide-react": "^1.8.0",
@@ -27,6 +34,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.2.4",
     "postcss": "^8.5.10",
+    "prisma": "^5.22.0",
     "tailwindcss": "^3.4.4",
     "typescript": "^5"
   }
