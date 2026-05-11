@@ -38,7 +38,7 @@ interface Customer {
   role: 'customer' | 'staff';
 }
 
-const statusOptions = ['Order Placed', 'Processing', 'Shipped', 'In Transit', 'Delivered'];
+const statusOptions = ['Order Placed', 'Processing',   'Quality Inspection','Shipped', 'In Transit', 'Delivered'];
 
 export default function AdminPage() {
   const { user, isLoading } = useAuth();

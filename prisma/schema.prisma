@@ -1,4 +1,4 @@
-// This is your Prisma schema file,
+// This is your Prisma schema file
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
@@ -10,80 +10,82 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// User model for authentication and customer management
 model User {
-  id        String   @id @default(cuid())
-  customerId String @unique
-  email     String   @unique
-  password  String   
-  name      String
-  role      String 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id         String   @id @default(cuid())
+  customerId String   @unique
+  email      String   @unique
+  password   String
+  name       String
+  role       String
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
   // Relations
   orders Order[]
 }
 
-// Order model for tracking customer orders
 model Order {
   id             String   @id @default(cuid())
+
   status         String   @default("pending")
   location       String
 
-  price          Float?
-  orderDate String?
+  price          Float?   @default(0)
 
+  orderDate      String?
   deliveryDate   String?
+
   fabricWidth    String?
 
   paymentTerms   String?
-  paymentStatus  String? @default("Pending")
-  advanceAmount  Float?
-  dueAmount      Float?
+  paymentStatus  String?  @default("Pending")
+
+  advanceAmount  Float?   @default(0)
+  dueAmount      Float?   @default(0)
 
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
+  // Relations
   customer       User     @relation(fields: [customerId], references: [id], onDelete: Cascade)
   customerId     String
 
   items          OrderItem[]
 }
 
-
-// OrderItem model for individual items in orders
 model OrderItem {
-  id        String   @id @default(cuid())
-  name      String
-  quantity  Int
-  price     Float?   // Optional: price per unit
-  createdAt DateTime @default(now())
+  id         String   @id @default(cuid())
+  name       String
+  quantity   Int
+  price      Float?
+
+  createdAt  DateTime @default(now())
 
   // Relations
-  order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  orderId String
+  order      Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderId    String
 }
 
-// Product/Fabric model for inventory management
 model Product {
   id          String   @id @default(cuid())
   name        String
   description String?
-  category    String   // 'fabric', 'textile', etc.
+  category    String
   price       Float
   stock       Int      @default(0)
   image       String?
+
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
 
-// Contact form submissions
 model ContactSubmission {
-  id        String   @id @default(cuid())
-  name      String
-  email     String
-  subject   String
-  message   String
-  createdAt DateTime @default(now())
+  id         String   @id @default(cuid())
+  name       String
+  email      String
+  subject    String
+  message    String
+
+  createdAt  DateTime @default(now())
 }

@@ -28,7 +28,9 @@ export interface Order {
   items: OrderItem[];
 }
 
-export const getOrders = async (customerId?: string) => {
+export const getOrders = async (
+  customerId?: string
+) => {
   return await prisma.order.findMany({
     where: customerId
       ? {
@@ -49,7 +51,9 @@ export const getOrders = async (customerId?: string) => {
   });
 };
 
-export const getOrderById = async (id: string) => {
+export const getOrderById = async (
+  id: string
+) => {
   return await prisma.order.findUnique({
     where: { id },
 
@@ -60,51 +64,71 @@ export const getOrderById = async (id: string) => {
   });
 };
 
-export const addOrder = async (orderData: {
-  customerId: string;
+export const addOrder = async (
+  orderData: {
+    customerId: string;
 
-  status?: string;
-  location: string;
+    status?: string;
+    location: string;
 
-  orderDate?: string;
-  deliveryDate?: string;
+    orderDate?: string;
+    deliveryDate?: string;
 
-  price?: number;
-  fabricWidth?: string;
+    price?: number;
+    fabricWidth?: string;
 
-  paymentTerms?: string;
-  paymentStatus?: string;
+    paymentTerms?: string;
+    paymentStatus?: string;
 
-  advanceAmount?: number;
-  dueAmount?: number;
+    advanceAmount?: number;
+    dueAmount?: number;
 
-  items: OrderItem[];
-}) => {
+    items: OrderItem[];
+  }
+) => {
   return await prisma.order.create({
     data: {
       customerId: orderData.customerId,
 
-      status: orderData.status || 'pending',
+      status:
+        orderData.status || 'pending',
+
       location: orderData.location,
 
-      orderDate: orderData.orderDate,
-      deliveryDate: orderData.deliveryDate,
+      orderDate:
+        orderData.orderDate || null,
 
-      price: orderData.price,
-      fabricWidth: orderData.fabricWidth,
+      deliveryDate:
+        orderData.deliveryDate || null,
 
-      paymentTerms: orderData.paymentTerms,
-      paymentStatus: orderData.paymentStatus || 'Pending',
+      price: orderData.price || 0,
 
-      advanceAmount: orderData.advanceAmount,
-      dueAmount: orderData.dueAmount,
+      fabricWidth:
+        orderData.fabricWidth || '',
+
+      paymentTerms:
+        orderData.paymentTerms || '',
+
+      paymentStatus:
+        orderData.paymentStatus ||
+        'Pending',
+
+      advanceAmount:
+        orderData.advanceAmount || 0,
+
+      dueAmount:
+        orderData.dueAmount || 0,
 
       items: {
-        create: orderData.items.map((item) => ({
-          name: item.name,
-          quantity: item.quantity,
-          price: item.price,
-        })),
+        create: orderData.items.map(
+          (item) => ({
+            name: item.name,
+
+            quantity: item.quantity,
+
+            price: item.price || 0,
+          })
+        ),
       },
     },
 
@@ -117,6 +141,7 @@ export const addOrder = async (orderData: {
 
 export const updateOrder = async (
   id: string,
+
   orderData: {
     status?: string;
     location?: string;
@@ -153,37 +178,55 @@ export const updateOrder = async (
       }),
 
       ...(orderData.deliveryDate && {
-        deliveryDate: orderData.deliveryDate,
+        deliveryDate:
+          orderData.deliveryDate,
       }),
 
-      ...(orderData.price !== undefined && {
+      ...(orderData.price !==
+        undefined && {
         price: orderData.price,
       }),
 
       ...(orderData.fabricWidth && {
-        fabricWidth: orderData.fabricWidth,
+        fabricWidth:
+          orderData.fabricWidth,
       }),
 
       ...(orderData.paymentTerms && {
-        paymentTerms: orderData.paymentTerms,
+        paymentTerms:
+          orderData.paymentTerms,
       }),
 
       ...(orderData.paymentStatus && {
-        paymentStatus: orderData.paymentStatus,
+        paymentStatus:
+          orderData.paymentStatus,
       }),
 
-      ...(orderData.advanceAmount !== undefined && {
-        advanceAmount: orderData.advanceAmount,
+      ...(orderData.advanceAmount !==
+        undefined && {
+        advanceAmount:
+          orderData.advanceAmount,
       }),
 
-      ...(orderData.dueAmount !== undefined && {
+      ...(orderData.dueAmount !==
+        undefined && {
         dueAmount: orderData.dueAmount,
       }),
 
       ...(orderData.items && {
         items: {
           deleteMany: {},
-          create: orderData.items,
+
+          create: orderData.items.map(
+            (item) => ({
+              name: item.name,
+
+              quantity:
+                item.quantity,
+
+              price: item.price || 0,
+            })
+          ),
         },
       }),
     },
@@ -195,7 +238,9 @@ export const updateOrder = async (
   });
 };
 
-export const deleteOrder = async (id: string) => {
+export const deleteOrder = async (
+  id: string
+) => {
   return await prisma.order.delete({
     where: { id },
   });

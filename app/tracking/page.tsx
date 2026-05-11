@@ -35,6 +35,7 @@ interface Order {
 const statusSteps = [
   'Order Placed',
   'Processing',
+    'Quality Inspection',
   'Shipped',
   'In Transit',
   'Delivered',
@@ -270,25 +271,8 @@ export default function TrackingPage() {
                         </p>
                       </div>
 
-                      <div className="bg-gray-50 rounded-xl p-4">
-                        <p className="text-sm text-gray-500">
-                          Advance Amount
-                        </p>
+                    
 
-                        <p className="font-semibold text-gray-900">
-                          ₹{order.advanceAmount || 0}
-                        </p>
-                      </div>
-
-                      <div className="bg-gray-50 rounded-xl p-4">
-                        <p className="text-sm text-gray-500">
-                          Due Amount
-                        </p>
-
-                        <p className="font-semibold text-gray-900">
-                          ₹{order.dueAmount || 0}
-                        </p>
-                      </div>
 
                     </div>
                   </div>
