@@ -7,11 +7,12 @@ export async function GET() {
   try {
     const users = await getUsers();
     const publicUsers = users.map(user => ({
-      id: user.id,
-      email: user.email,
-      name: user.name,
-      role: user.role,
-    }));
+  id: user.id,
+  customerId: user.customerId,
+  email: user.email,
+  name: user.name,
+  role: user.role,
+}));
 
     return NextResponse.json(
       publicUsers,
@@ -42,21 +43,23 @@ export async function POST(request: NextRequest) {
 
     // TODO: Hash password before storing (use bcrypt)
     // For now, storing plaintext - DO NOT USE IN PRODUCTION
-    const newUser = await addUser({
-      email: email,
-      password: body.password,
-      name: body.name,
-      role: body.role || 'customer',
-    });
+  const newUser = await addUser({
+  customerId: body.id,
+  email: email,
+  password: body.password,
+  name: body.name,
+  role: body.role || 'customer',
+});
 
     return NextResponse.json({
       success: true,
-      user: {
-        id: newUser.id,
-        email: newUser.email,
-        name: newUser.name,
-        role: newUser.role,
-      },
+     user: {
+  id: newUser.id,
+  customerId: newUser.customerId,
+  email: newUser.email,
+  name: newUser.name,
+  role: newUser.role,
+},
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error';

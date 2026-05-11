@@ -10,15 +10,30 @@ interface OrderItem {
 }
 
 interface Order {
+  orderDate: string;
+  price: number;
+  fabricWidth: string;
+  deliveryDate: string;
+  paymentTerms: string;
+  paymentStatus: string;
+  advanceAmount: number;
+  dueAmount: number;
+
   id: string;
   status: string;
   location: string;
   customerId: string;
+
+  customer: {
+    name: string;
+    customerId: string;
+  };
+
   items: OrderItem[];
 }
-
 interface Customer {
   id: string;
+  customerId: string;
   name: string;
   role: 'customer' | 'staff';
 }
@@ -45,7 +60,19 @@ export default function AdminPage() {
   const [newOrderId, setNewOrderId] = useState('');
   const [newOrderCustomer, setNewOrderCustomer] = useState('');
   const [newOrderStatus, setNewOrderStatus] = useState('Order Placed');
+ 
   const [newOrderLocation, setNewOrderLocation] = useState('');
+ 
+  const [newOrderPrice, setNewOrderPrice] = useState('');
+const [newOrderDate, setNewOrderDate] = useState('');
+const [newDeliveryDate, setNewDeliveryDate] = useState('');
+const [newFabricWidth, setNewFabricWidth] = useState('');
+
+const [newPaymentTerms, setNewPaymentTerms] = useState('');
+const [newPaymentStatus, setNewPaymentStatus] = useState('Pending');
+
+const [newAdvanceAmount, setNewAdvanceAmount] = useState('');
+const [newDueAmount, setNewDueAmount] = useState('');
   const [newOrderItems, setNewOrderItems] = useState<OrderItem[]>([
     { name: '', quantity: 1 },
   ]);
@@ -205,11 +232,24 @@ useEffect(() => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          id: orderId,
-          customerId: newOrderCustomer,
-          status: newOrderStatus,
-          location: orderLocation,
-          items: validItems,
+  id: orderId,
+  customerId: newOrderCustomer,
+  status: newOrderStatus,
+  location: orderLocation,
+
+  price: Number(newOrderPrice),
+    orderDate: newOrderDate,
+  deliveryDate: newDeliveryDate,
+  fabricWidth: newFabricWidth,
+
+  paymentTerms: newPaymentTerms,
+  paymentStatus: newPaymentStatus,
+
+  advanceAmount: Number(newAdvanceAmount),
+  dueAmount: Number(newDueAmount),
+
+  items: validItems,
+
         }),
       });
 
@@ -223,6 +263,16 @@ useEffect(() => {
       setNewOrderCustomer('');
       setNewOrderStatus('Order Placed');
       setNewOrderLocation('');
+      setNewOrderPrice('');
+setNewOrderDate('');
+setNewDeliveryDate('');
+setNewFabricWidth('');
+
+setNewPaymentTerms('');
+setNewPaymentStatus('Pending');
+
+setNewAdvanceAmount('');
+setNewDueAmount('');
       setNewOrderItems([{ name: '', quantity: 1 }]);
       setOrderMessage('Order created successfully.');
       refreshAdminData();
@@ -252,9 +302,15 @@ useEffect(() => {
   }
 
   const customerList = customers.filter(c => c.role === 'customer');
-  const filteredCustomerList = customerList.filter(customer =>
-    customer.id.toLowerCase().includes(customerSearchId.trim().toLowerCase())
-  );
+const filteredCustomerList = customerList.filter(customer =>
+  customer.customerId
+    .toLowerCase()
+    .includes(customerSearchId.trim().toLowerCase()) ||
+
+  customer.name
+    .toLowerCase()
+    .includes(customerSearchId.trim().toLowerCase())
+);
   const orderList = orders;
 
   return (
@@ -338,8 +394,7 @@ useEffect(() => {
                 <div key={customer.id} className="grid grid-cols-1 md:grid-cols-4 gap-4 items-center border border-gray-200 rounded-2xl p-4">
                   <div>
                     <p className="text-sm font-medium text-gray-900">{customer.name}</p>
-                    <p className="text-sm text-gray-500">{customer.id}</p>
-                  </div>
+<p className="text-sm text-gray-500">{customer.customerId}</p>                  </div>
                   <div className="text-sm text-gray-600">Role: {customer.role}</div>
                   <div className="md:col-span-2 text-right">
                     <button
@@ -375,8 +430,9 @@ useEffect(() => {
             >
               <option value="">Select Customer</option>
               {customers.filter(c => c.role === 'customer').map((customer) => (
-                <option key={customer.id} value={customer.id}>{customer.name} ({customer.id})</option>
-              ))}
+<option key={customer.id} value={customer.id}>
+  {customer.name} ({customer.customerId})
+</option>             ))}
             </select>
             <select
               value={newOrderStatus}
@@ -393,6 +449,88 @@ useEffect(() => {
               placeholder="Location"
               className="w-full px-4 py-3 border rounded-lg"
             />
+            <input
+  type="number"
+  value={newOrderPrice}
+  onChange={(e) => setNewOrderPrice(e.target.value)}
+  placeholder="Price"
+  className="w-full px-4 py-3 border rounded-lg"
+/>
+
+<div className="flex flex-col gap-2">
+  <label className="text-sm font-medium text-gray-700">
+    Order Date
+  </label>
+
+  <input
+    type="date"
+    value={newOrderDate}
+    onChange={(e) => setNewOrderDate(e.target.value)}
+    className="w-full px-4 py-3 border rounded-lg"
+  />
+</div>
+
+<div className="flex flex-col gap-2">
+  <label className="text-sm font-medium text-gray-700">
+    Delivery Date
+  </label>
+
+  <input
+    type="date"
+    value={newDeliveryDate}
+    onChange={(e) => setNewDeliveryDate(e.target.value)}
+    className="w-full px-4 py-3 border rounded-lg"
+  />
+</div>
+
+
+<input
+  value={newFabricWidth}
+  onChange={(e) => setNewFabricWidth(e.target.value)}
+  placeholder="Fabric Width"
+  className="w-full px-4 py-3 border rounded-lg"
+/>
+
+<select
+  value={newPaymentTerms}
+  onChange={(e) => setNewPaymentTerms(e.target.value)}
+  className="w-full px-4 py-3 border rounded-lg"
+>
+  <option value="">Payment Terms</option>
+
+  <option value="Payment in Advance">
+    Payment in Advance
+  </option>
+
+  <option value="Payment Due at Time of Service">
+    Payment Due at Time of Service
+  </option>
+
+  <option value="Due Upon Receipt">
+    Due Upon Receipt
+  </option>
+
+  <option value="End of Month">
+    End of Month
+  </option>
+
+  <option value="Net 7">Net 7</option>
+  <option value="Net 15">Net 15</option>
+  <option value="Net 30">Net 30</option>
+</select>
+
+
+
+
+
+
+
+
+
+
+
+
+
           </div>
 
           <div className="mt-6 space-y-4">
@@ -464,7 +602,17 @@ useEffect(() => {
                 <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
                   <div>
                     <h3 className="text-xl font-bold text-gray-900">Order #{order.id}</h3>
-                    <p className="text-sm text-gray-600">Customer: {order.customerId}</p>
+                    <p className="text-sm text-gray-600">
+  Customer: {order.customer?.name}
+</p>
+
+<p className="text-sm text-gray-500">
+  Customer ID: {order.customer?.customerId}
+</p>
+
+<p className="text-xs text-gray-400">
+  Internal ID: {order.customerId}
+</p>
                   </div>
                   <div className="flex flex-wrap gap-2">
                     <span className="px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800">{order.status}</span>
@@ -473,6 +621,27 @@ useEffect(() => {
                 </div>
 
                 <div className="mt-4 bg-white rounded-2xl p-4 border border-gray-200">
+                 <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3 text-sm text-gray-700">
+  <p><strong>Price:</strong> ₹{order.price || 0}</p>
+  <p><strong>Fabric Width:</strong> {order.fabricWidth || '-'}</p>
+ <p>
+    <strong>Order Date:</strong>{' '}
+    {order.orderDate || '-'}
+  </p>
+
+  <p>
+    <strong>Delivery Date:</strong>{' '}
+    {order.deliveryDate || '-'}
+  </p>
+
+  <p><strong>Payment Terms:</strong> {order.paymentTerms || '-'}</p>
+
+  
+
+ 
+
+
+</div>
                   <h4 className="font-semibold text-gray-900 mb-3">Items</h4>
                   <div className="space-y-2">
                     {order.items.map((item, index) => (

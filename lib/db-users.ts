@@ -2,6 +2,7 @@ import prisma from './prisma';
 
 export interface User {
   id: string;
+  customerId: string;
   email: string;
   password: string;
   name: string;
@@ -25,6 +26,7 @@ export const getUserByEmail = async (email: string) => {
 };
 
 export const addUser = async (userData: {
+  customerId: string;
   email: string;
   password: string;
   name: string;
@@ -32,6 +34,7 @@ export const addUser = async (userData: {
 }) => {
   return await prisma.user.create({
     data: {
+      customerId: userData.customerId,
       email: userData.email,
       password: userData.password,
       name: userData.name,
@@ -43,6 +46,7 @@ export const addUser = async (userData: {
 export const updateUser = async (
   id: string,
   userData: {
+    customerId?: string;
     email?: string;
     password?: string;
     name?: string;

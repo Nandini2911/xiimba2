@@ -13,10 +13,11 @@ datasource db {
 // User model for authentication and customer management
 model User {
   id        String   @id @default(cuid())
+  customerId String @unique
   email     String   @unique
-  password  String   // Should be hashed
+  password  String   
   name      String
-  role      String   @default("customer") // 'customer' or 'staff'
+  role      String 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -26,17 +27,30 @@ model User {
 
 // Order model for tracking customer orders
 model Order {
-  id        String   @id @default(cuid())
-  status    String   @default("pending") // 'pending', 'processing', 'shipped', 'delivered', 'cancelled'
-  location  String   // Shipping location
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id             String   @id @default(cuid())
+  status         String   @default("pending")
+  location       String
 
-  // Relations
-  customer   User     @relation(fields: [customerId], references: [id], onDelete: Cascade)
-  customerId String
-  items      OrderItem[]
+  price          Float?
+  orderDate String?
+
+  deliveryDate   String?
+  fabricWidth    String?
+
+  paymentTerms   String?
+  paymentStatus  String? @default("Pending")
+  advanceAmount  Float?
+  dueAmount      Float?
+
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  customer       User     @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  customerId     String
+
+  items          OrderItem[]
 }
+
 
 // OrderItem model for individual items in orders
 model OrderItem {
