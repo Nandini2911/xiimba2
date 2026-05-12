@@ -88,7 +88,7 @@ export default function Footer() {
           <p>
              developed by{" "}
             <a
-              href="https://doubletroublestudio.com"
+              href="https://dtsworld.in"
               target="_blank"
               rel="noopener noreferrer"
               className="hover:text-charcoal transition font-medium"
