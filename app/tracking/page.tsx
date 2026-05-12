@@ -28,6 +28,12 @@ interface Order {
 
   advanceAmount?: number;
   dueAmount?: number;
+  
+ customer?: {
+    name: string;
+    customerId: string;
+  };
+
 
   items?: OrderItem[];
 }
@@ -146,6 +152,22 @@ export default function TrackingPage() {
                       <p className="text-plumLight mt-1">
                         Track your order status below
                       </p>
+
+                       <div className="mt-3 text-sm text-white space-y-1">
+    <p>
+      Customer Name:{" "}
+      <span className="font-semibold">
+        {order.customer?.name || "N/A"}
+      </span>
+    </p>
+
+    <p>
+      Customer ID:{" "}
+      <span className="font-semibold">
+        {order.customer?.customerId || "N/A"}
+      </span>
+    </p>
+  </div>
                     </div>
                   </div>
 
@@ -261,15 +283,7 @@ export default function TrackingPage() {
                         </p>
                       </div>
 
-                      <div className="bg-gray-50 rounded-xl p-4">
-                        <p className="text-sm text-gray-500">
-                          Payment Status
-                        </p>
-
-                        <p className="font-semibold text-gray-900">
-                          {order.paymentStatus || '-'}
-                        </p>
-                      </div>
+                      
 
                     
 
@@ -306,11 +320,6 @@ export default function TrackingPage() {
                               </p>
                             </div>
 
-                            <div className="text-right">
-                              <p className="font-semibold text-gray-900">
-                                ₹{item.price || 0}
-                              </p>
-                            </div>
 
                           </div>
                         ))}
